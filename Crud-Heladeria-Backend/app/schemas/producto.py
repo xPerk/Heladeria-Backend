@@ -1,6 +1,7 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from typing import Optional
 from datetime import datetime
+import re
 
 # Esquema base para producto
 class ProductoBase(BaseModel):
@@ -11,6 +12,26 @@ class ProductoBase(BaseModel):
     precio_mayorista: Optional[float] = Field(None, gt=0)
     cantidad_minima_mayorista: Optional[int] = Field(default=10, gt=0)
     stock: int = Field(default=0, ge=0)
+    imagen_url: Optional[str] = Field(None, max_length=500)
+    
+    @field_validator('imagen_url')
+    @classmethod
+    def validate_imagen_url(cls, v):
+        if v is None or v == "":
+            return v
+        # Validar formato básico de URL
+        url_pattern = re.compile(
+            r'^https?://'  # http:// o https://
+            r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+'
+            r'(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # host
+            r'localhost|'  # localhost
+            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # IP
+            r'(?::\d+)?'  # puerto opcional
+            r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+        
+        if not url_pattern.match(v):
+            raise ValueError('La URL de imagen no tiene un formato válido')
+        return v
     categoria_id: int
     activo: bool = True
 
@@ -27,6 +48,7 @@ class ProductoUpdate(BaseModel):
     precio_mayorista: Optional[float] = Field(None, gt=0)
     cantidad_minima_mayorista: Optional[int] = Field(None, gt=0)
     stock: Optional[int] = Field(None, ge=0)
+    imagen_url: Optional[str] = Field(None, max_length=500)
     categoria_id: Optional[int] = None
     activo: Optional[bool] = None
 

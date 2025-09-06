@@ -15,6 +15,7 @@ class Producto(Base):
     precio_mayorista = Column(Numeric(10, 2))
     cantidad_minima_mayorista = Column(Integer, default=10)
     stock = Column(Integer, default=0, nullable=False)
+    imagen_url = Column(String(500), nullable=True)
     categoria_id = Column(Integer, ForeignKey("categorias.id"), nullable=False)
     activo = Column(Boolean, default=True)
     fecha_creacion = Column(DateTime, server_default=func.now())
