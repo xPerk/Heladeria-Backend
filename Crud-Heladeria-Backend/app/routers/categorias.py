@@ -4,12 +4,14 @@ from typing import List
 
 from app.database.database import get_db
 from app.models.categoria import Categoria
+from app.models.usuario import Usuario
 from app.schemas.categoria import (
     CategoriaCreate,
     CategoriaUpdate,
     CategoriaResponse,
     CategoriaWithProductos
 )
+from app.auth.dependencies import get_current_active_user
 
 router = APIRouter(
     prefix="/categorias",
@@ -54,7 +56,8 @@ def obtener_categoria(
 @router.post("/", response_model=CategoriaResponse, status_code=status.HTTP_201_CREATED)
 def crear_categoria(
     categoria: CategoriaCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user)
 ):
     """Crear una nueva categoría"""
     # Verificar si ya existe una categoría con el mismo nombre
@@ -80,7 +83,8 @@ def crear_categoria(
 def actualizar_categoria(
     categoria_id: int,
     categoria_update: CategoriaUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user)
 ):
     """Actualizar una categoría existente"""
     categoria = db.query(Categoria).filter(Categoria.id == categoria_id).first()
@@ -118,7 +122,8 @@ def actualizar_categoria(
 @router.delete("/{categoria_id}", status_code=status.HTTP_204_NO_CONTENT)
 def eliminar_categoria(
     categoria_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user)
 ):
     """Eliminar una categoría (soft delete - marcar como inactiva)"""
     categoria = db.query(Categoria).filter(Categoria.id == categoria_id).first()
@@ -148,7 +153,8 @@ def eliminar_categoria(
 @router.patch("/{categoria_id}/activar", response_model=CategoriaResponse)
 def activar_categoria(
     categoria_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user)
 ):
     """Activar una categoría inactiva"""
     categoria = db.query(Categoria).filter(Categoria.id == categoria_id).first()

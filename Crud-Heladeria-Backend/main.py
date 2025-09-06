@@ -5,10 +5,10 @@ import os
 from dotenv import load_dotenv
 
 # Importar routers
-from app.routers import categorias, productos
+from app.routers import categorias, productos, auth
 
 # Importar modelos para crear las tablas
-from app.models import categoria, producto
+from app.models import categoria, producto, usuario
 from app.database.database import engine, Base
 
 # Cargar variables de entorno
@@ -36,6 +36,7 @@ app.add_middleware(
 )
 
 # Incluir routers
+app.include_router(auth.router, prefix="/api/v1")
 app.include_router(categorias.router, prefix="/api/v1")
 app.include_router(productos.router, prefix="/api/v1")
 

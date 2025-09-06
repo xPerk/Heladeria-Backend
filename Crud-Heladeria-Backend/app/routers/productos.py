@@ -6,6 +6,7 @@ from decimal import Decimal
 from app.database.database import get_db
 from app.models.producto import Producto
 from app.models.categoria import Categoria
+from app.models.usuario import Usuario
 from app.schemas.producto import (
     ProductoCreate,
     ProductoUpdate,
@@ -13,6 +14,7 @@ from app.schemas.producto import (
     ProductoWithCategoria,
     ProductoPrecioCalculado
 )
+from app.auth.dependencies import get_current_active_user
 
 router = APIRouter(
     prefix="/productos",
@@ -73,7 +75,8 @@ def obtener_producto(
 @router.post("/", response_model=ProductoResponse, status_code=status.HTTP_201_CREATED)
 def crear_producto(
     producto: ProductoCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user)
 ):
     """Crear un nuevo producto"""
     # Verificar que la categoría existe
@@ -103,7 +106,8 @@ def crear_producto(
 def actualizar_producto(
     producto_id: int,
     producto_update: ProductoUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user)
 ):
     """Actualizar un producto existente"""
     producto = db.query(Producto).filter(Producto.id == producto_id).first()
@@ -146,7 +150,8 @@ def actualizar_producto(
 @router.delete("/{producto_id}", status_code=status.HTTP_204_NO_CONTENT)
 def eliminar_producto(
     producto_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user)
 ):
     """Eliminar un producto (soft delete - marcar como inactivo)"""
     producto = db.query(Producto).filter(Producto.id == producto_id).first()
@@ -167,7 +172,8 @@ def eliminar_producto(
 @router.patch("/{producto_id}/activar", response_model=ProductoResponse)
 def activar_producto(
     producto_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user)
 ):
     """Activar un producto inactivo"""
     producto = db.query(Producto).filter(Producto.id == producto_id).first()
@@ -189,7 +195,8 @@ def activar_producto(
 def actualizar_stock(
     producto_id: int,
     nuevo_stock: int = Query(..., ge=0, description="Nueva cantidad en stock"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_active_user)
 ):
     """Actualizar el stock de un producto"""
     producto = db.query(Producto).filter(Producto.id == producto_id).first()
